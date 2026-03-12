@@ -1136,7 +1136,6 @@ function toggleWish() {
 /* ═══════════════════════════════════════
    RESERVE
 ═══════════════════════════════════════ */
-const RESERVATION_OPEN_DATE = '2026-07-01';
 function gotoReserve() {
   if(!me) return showToast('로그인이 필요해요');
   if(!selProd) return;
@@ -1145,9 +1144,8 @@ function gotoReserve() {
   document.getElementById('res-prod-name').textContent = p.name;
   document.getElementById('res-prod-price').textContent = `${p.price.toLocaleString()}원/월 · 보증금 ${p.deposit.toLocaleString()}원`;
   const today = new Date().toISOString().split('T')[0];
-  const minStart = today > RESERVATION_OPEN_DATE ? today : RESERVATION_OPEN_DATE;
-  document.getElementById('r-start').min = minStart;
-  document.getElementById('r-end').min = minStart;
+  document.getElementById('r-start').min = today;
+  document.getElementById('r-end').min = today;
   document.getElementById('r-start').value = '';
   document.getElementById('r-end').value = '';
   document.getElementById('r-addr1').value = ls.get('bb_addr1')||'';
@@ -1185,7 +1183,6 @@ function gotoPayment() {
   const addr1=document.getElementById('r-addr1').value.trim();
   const time=document.getElementById('r-time').value;
   if(!start) return showToast('렌탈 시작일을 선택해주세요');
-  if(start < RESERVATION_OPEN_DATE) return showToast(`렌탈 시작일은 ${RESERVATION_OPEN_DATE}부터 선택할 수 있어요`);
   if(!addr1) return showToast('배송 주소를 입력해주세요');
   if(!time) return showToast('수령 희망 시간을 선택해주세요');
   let end=document.getElementById('r-end').value;

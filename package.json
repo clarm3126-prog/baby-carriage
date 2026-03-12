@@ -1,0 +1,8 @@
+{
+  "name": "bebeca-api",
+  "version": "1.0.0",
+  "description": "베베카 서버리스 API - SMS OTP + 토스 결제 승인",
+  "dependencies": {
+    "coolsms-node-sdk": "^4.3.1"
+  }
+}
