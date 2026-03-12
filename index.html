@@ -10,8 +10,6 @@
   integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
   crossorigin="anonymous"></script>
 
-<!-- 토스페이먼츠 SDK -->
-<script src="https://js.tosspayments.com/v2/standard"></script>
 <!-- 다음 주소 검색은 클릭 시 동적 로딩 -->
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -560,56 +558,6 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   </div>
 </div>
 
-<!-- ════════ PAYMENT ════════ -->
-<div id="s-payment" class="screen">
-  <div class="hdr"><button class="btn-back" onclick="go('reserve')">←</button><h2>결제</h2><div class="hdr-r"></div></div>
-  <div class="scroll-body" style="padding-bottom:20px">
-    <div style="padding:20px">
-      <!-- 주문 요약 -->
-      <div class="card" style="padding:16px 18px;margin-bottom:16px">
-        <div class="sec-title" style="margin-bottom:12px">주문 정보</div>
-        <div style="border-bottom:1px solid var(--border);padding:8px 0;display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gray1)">상품명</span><span id="pay-pname" style="font-weight:600;text-align:right;max-width:200px"></span></div>
-        <div style="border-bottom:1px solid var(--border);padding:8px 0;display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gray1)">렌탈 기간</span><span id="pay-period" style="font-weight:600"></span></div>
-        <div style="padding:8px 0;display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gray1)">배송 주소</span><span id="pay-addr" style="font-weight:600;text-align:right;max-width:200px;font-size:13px"></span></div>
-      </div>
-      <!-- 금액 -->
-      <div class="price-tbl" style="margin-bottom:20px">
-        <div class="pt-row"><span class="pt-label">렌탈 요금</span><span class="pt-value" id="pay-rental"></span></div>
-        <div class="pt-row"><span class="pt-label">보증금</span><span class="pt-value" id="pay-deposit"></span></div>
-        <div class="pt-row total"><span class="pt-label" style="font-weight:700">총 결제 금액</span><span class="pt-value accent" id="pay-total"></span></div>
-      </div>
-      <!-- 결제 수단 -->
-      <div class="sec-title" style="margin-bottom:10px">결제 수단 선택</div>
-      <div id="pay-methods">
-        <div class="pay-method-card selected" id="pm-card" onclick="selectPayMethod('card')">
-          <span style="font-size:24px">💳</span>
-          <div style="flex:1"><div style="font-size:14px;font-weight:700">신용 / 체크카드</div><div style="font-size:12px;color:var(--gray2)">모든 카드 가능 · 할부 최대 12개월</div></div>
-          <div class="pm-check">✓</div>
-        </div>
-        <div class="pay-method-card" id="pm-transfer" onclick="selectPayMethod('transfer')">
-          <span style="font-size:24px">🏦</span>
-          <div style="flex:1"><div style="font-size:14px;font-weight:700">계좌이체</div><div style="font-size:12px;color:var(--gray2)">실시간 이체</div></div>
-          <div class="pm-check">✓</div>
-        </div>
-        <div class="pay-method-card" id="pm-phone" onclick="selectPayMethod('phone')">
-          <span style="font-size:24px">📱</span>
-          <div style="flex:1"><div style="font-size:14px;font-weight:700">휴대폰 결제</div><div style="font-size:12px;color:var(--gray2)">통신사 소액 결제</div></div>
-          <div class="pm-check">✓</div>
-        </div>
-      </div>
-      <!-- 약관 -->
-      <div class="sec-title" style="margin-bottom:4px;margin-top:8px">약관 동의</div>
-      <div class="card" style="padding:0 16px;margin-bottom:20px">
-        <div class="check-item" onclick="togglePay('p1')"><div class="ci-box" id="p1"></div><div><div class="ci-text">[필수] 환불 규정 동의</div><div class="ci-sub">배송 후 첫 달 요금 환불 불가</div></div></div>
-        <div class="check-item" onclick="togglePay('p2')"><div class="ci-box" id="p2"></div><div><div class="ci-text">[필수] 파손 / 오염 규정 동의</div><div class="ci-sub">고의 파손·과도한 오염 시 수리비 청구</div></div></div>
-        <div class="check-item" onclick="togglePay('p3')"><div class="ci-box" id="p3"></div><div class="ci-text">[필수] 개인정보 수집 및 이용 동의</div></div>
-      </div>
-      <!-- 결제 버튼 -->
-      <button class="btn btn-p" id="pay-submit-btn" onclick="startTossPayment()">결제하기 💳</button>
-    </div>
-  </div>
-</div>
-
 <!-- ════════ COMPLETE ════════ -->
 <div id="s-complete" class="screen">
   <div class="success-screen">
@@ -778,11 +726,6 @@ const CONFIG = {
   //    예: 'https://bebeca-api-xxx.vercel.app'
   API_BASE: '',
 
-  // ③ 토스페이먼츠 클라이언트 키
-  //    → developers.tosspayments.com → 테스트 연동 → 클라이언트 키
-  //    테스트 키는 test_ck_ 로 시작 (실제 결제 없음, 카드번호 아무거나)
-  TOSS_CLIENT_KEY: 'test_ck_D4yKeq5bgrpKL9BqnYW9rVXaGYZ5',
-
 };
 </script>
 
@@ -861,8 +804,7 @@ const PRODS = [
    STATE
 ═══════════════════════════════════════ */
 let me = null, selProd = null, resData = {}, curRentalId = null;
-let sliderIdx = 0, selectedPayMethod = 'card';
-let payChecks = {p1:false,p2:false,p3:false}, retChecks = {};
+let sliderIdx = 0, retChecks = {};
 let otpTimers = {};
 
 /* ═══════════════════════════════════════
@@ -1406,64 +1348,6 @@ async function gotoPayment() {
   saveAndComplete(orderId);
 }
 
-/* ═══════════════════════════════════════
-   TOSS PAYMENTS
-═══════════════════════════════════════ */
-function selectPayMethod(method) {
-  selectedPayMethod=method;
-  document.querySelectorAll('.pay-method-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('pm-'+method).classList.add('selected');
-}
-function togglePay(id) { payChecks[id]=!payChecks[id]; document.getElementById(id).classList.toggle('on',payChecks[id]); }
-
-async function startTossPayment() {
-  if(!payChecks.p1||!payChecks.p2||!payChecks.p3) return showToast('필수 약관에 모두 동의해주세요');
-  if(!selProd || !resData.total) return showToast('결제 정보가 없어요');
-
-  // 결제 수단 매핑
-  const methodMap = { card:'CARD', transfer:'TRANSFER', phone:'MOBILE_PHONE' };
-  const orderId = 'BK' + Date.now().toString();
-  const orderName = `베베카 - ${selProd.name} ${resData.months}개월 렌탈`;
-
-  // CONFIG에 토스 키가 없으면 데모 결제
-  if(!CONFIG.TOSS_CLIENT_KEY || CONFIG.TOSS_CLIENT_KEY.startsWith('test_ck_D4yKeq5b')) {
-    // 토스 공개 테스트 키로 실제 결제 위젯 시도
-  }
-
-  try {
-    showLoading('결제창 준비 중...');
-    const tossPayments = await loadTossPayments(CONFIG.TOSS_CLIENT_KEY);
-    const payment = tossPayments.payment({ customerKey: me?.id || 'GUEST_' + Date.now() });
-    hideLoading();
-
-    await payment.requestPayment({
-      method: methodMap[selectedPayMethod] || 'CARD',
-      amount: { currency: 'KRW', value: resData.total },
-      orderId,
-      orderName,
-      customerName: me?.name || '고객',
-      customerEmail: me?.email || undefined,
-      successUrl: window.location.origin + window.location.pathname + '?payment=success',
-      failUrl: window.location.origin + window.location.pathname + '?payment=fail',
-    });
-  } catch(e) {
-    hideLoading();
-    if(e.code === 'USER_CANCEL') { showToast('결제를 취소했어요'); return; }
-    // 키 설정 안된 경우 시뮬레이션
-    console.warn('Toss payment error:', e);
-    confirmPaymentSimulation(orderId, orderName);
-  }
-}
-
-function confirmPaymentSimulation(orderId, orderName) {
-  // 실제 서비스에서는 이 함수 대신 토스 successUrl 콜백에서 처리
-  showLoading('결제 확인 중...');
-  setTimeout(() => {
-    hideLoading();
-    saveAndComplete(orderId);
-  }, 1500);
-}
-
 function saveAndComplete(orderId) {
   const rental = {
     id: orderId || 'PR'+Date.now(), userId: me?.id || '',
@@ -1471,8 +1355,7 @@ function saveAndComplete(orderId) {
     start: resData.start, end: resData.end, months: resData.months,
     addr: resData.addr, babyAge: resData.babyAge, useArea: resData.useArea, refCode: resData.refCode, note: resData.note,
     rentalAmt: resData.rentalAmt, deposit: selProd.deposit, total: resData.total,
-    requestedAt: new Date().toLocaleString('ko-KR'), status: '예약접수',
-    payMethod: selectedPayMethod
+    requestedAt: new Date().toLocaleString('ko-KR'), status: '예약접수'
   };
   const rentals = getRentals(); rentals.push(rental); saveRentals(rentals);
   document.getElementById('comp-receipt').innerHTML = `
@@ -1486,43 +1369,6 @@ function saveAndComplete(orderId) {
     <div class="rc-row"><span class="rc-l">예상 결제 금액</span><span>${rental.total.toLocaleString()}원</span></div>
   `;
   go('complete');
-}
-
-// 결제 콜백 처리 (successUrl 리디렉션 후)
-async function handlePaymentCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const status = params.get('payment');
-  if(!status) return;
-
-  // URL 파라미터 정리
-  window.history.replaceState({}, '', window.location.pathname);
-
-  if(status === 'success') {
-    const paymentKey = params.get('paymentKey');
-    const orderId = params.get('orderId');
-    const amount = params.get('amount');
-
-    if(CONFIG.API_BASE && paymentKey) {
-      showLoading('결제 최종 확인 중...');
-      try {
-        const res = await fetch(`${CONFIG.API_BASE}/api/payment/confirm`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
-        });
-        const data = await res.json();
-        hideLoading();
-        if(data.ok) { saveAndComplete(orderId); }
-        else { showToast('결제 확인 실패: ' + data.message); go('payment'); }
-      } catch(e) { hideLoading(); saveAndComplete(orderId); }
-    } else {
-      saveAndComplete(orderId);
-    }
-  } else if(status === 'fail') {
-    showToast('결제가 실패했어요. 다시 시도해주세요.');
-    if(me) { go('home'); navOn('home'); }
-    else { go('login'); }
-  }
 }
 
 /* ═══════════════════════════════════════
@@ -1621,9 +1467,6 @@ function closeModal(e,id) { if(e.target===document.getElementById(id)) document.
 ═══════════════════════════════════════ */
 (async function init() {
   initKakao();
-
-  // 결제 콜백 처리
-  await handlePaymentCallback();
 
   // 자동 로그인 복원
   const saved = ls.get('bb_me');
