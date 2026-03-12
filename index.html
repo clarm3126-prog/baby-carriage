@@ -510,7 +510,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
         </div>
         <div class="fg">
           <label class="fl">주 이용 지역 <span style="color:var(--accent);font-weight:700;text-transform:none">*</span></label>
-          <select class="fi" id="r-use-area">
+          <select class="fi" id="r-use-area" onchange="toggleUseAreaEtc()">
             <option value="">선택</option>
             <option>강남/서초/송파</option>
             <option>마포/용산/중구</option>
@@ -520,6 +520,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
             <option>경기 북부</option>
             <option>기타</option>
           </select>
+          <input class="fi" id="r-use-area-etc" type="text" placeholder="기타 지역 직접 입력" style="margin-top:8px;display:none;">
         </div>
       </div>
       <div class="fg"><label class="fl">추천코드 (선택)</label><input class="fi" id="r-ref-code" type="text" placeholder="예) FRIEND2026"></div>
@@ -1218,6 +1219,8 @@ function gotoReserve() {
   document.getElementById('r-addr2').value = ls.get('bb_addr2')||'';
   document.getElementById('r-baby-age').value = '';
   document.getElementById('r-use-area').value = '';
+  document.getElementById('r-use-area-etc').value = '';
+  document.getElementById('r-use-area-etc').style.display = 'none';
   document.getElementById('r-ref-code').value = '';
   document.getElementById('r-note').value = '';
   calcResPrice();
@@ -1246,6 +1249,14 @@ function fakeAddrSearch() {
   document.getElementById('r-addr1').value = addrs[Math.floor(Math.random()*addrs.length)];
   showToast('주소 입력됐어요 (테스트)');
 }
+function toggleUseAreaEtc() {
+  const useAreaEl = document.getElementById('r-use-area');
+  const etcEl = document.getElementById('r-use-area-etc');
+  if(!useAreaEl || !etcEl) return;
+  const showEtc = useAreaEl.value === '기타';
+  etcEl.style.display = showEtc ? 'block' : 'none';
+  if(!showEtc) etcEl.value = '';
+}
 async function submitPreorderToServer(payload) {
   const base = CONFIG.API_BASE || '';
   const endpoint = `${base}/api/preorders`;
@@ -1264,13 +1275,16 @@ async function gotoPayment() {
   const start=document.getElementById('r-start').value;
   const addr1=document.getElementById('r-addr1').value.trim();
   const babyAge=document.getElementById('r-baby-age').value;
-  const useArea=document.getElementById('r-use-area').value;
+  const useAreaBase=document.getElementById('r-use-area').value;
+  const useAreaEtc=(document.getElementById('r-use-area-etc').value || '').trim();
+  const useArea = useAreaBase === '기타' ? useAreaEtc : useAreaBase;
   const refCode=document.getElementById('r-ref-code').value.trim().toUpperCase();
   if(!start) return showToast('렌탈 시작일을 선택해주세요');
   if(start < RESERVATION_OPEN_DATE) return showToast(`렌탈 시작일은 ${RESERVATION_OPEN_DATE}부터 선택할 수 있어요`);
   if(!addr1) return showToast('배송 주소를 입력해주세요');
   if(!babyAge) return showToast('아이 연령대를 선택해주세요');
-  if(!useArea) return showToast('주 이용 지역을 선택해주세요');
+  if(!useAreaBase) return showToast('주 이용 지역을 선택해주세요');
+  if(useAreaBase === '기타' && !useAreaEtc) return showToast('기타 지역을 입력해주세요');
   let end=document.getElementById('r-end').value;
   if(!end){const d=new Date(start);d.setMonth(d.getMonth()+resData.months);end=d.toISOString().split('T')[0];}
   resData.start=start; resData.end=end;
