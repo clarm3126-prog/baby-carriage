@@ -126,7 +126,7 @@ module.exports = async (req, res) => {
       `기간: ${payload.start} ~ ${payload.end}`,
       `아이연령: ${payload.babyAge}`,
       `지역: ${payload.useArea}`,
-      `추천코드: ${payload.refCode || '-'}`,
+      `유입경로: ${payload.refCode || '-'}`,
       `예상결제: ${(Number(payload.total) || 0).toLocaleString()}원`,
     ].join('\n');
 
