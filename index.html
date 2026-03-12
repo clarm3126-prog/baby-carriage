@@ -12,8 +12,7 @@
 
 <!-- 토스페이먼츠 SDK -->
 <script src="https://js.tosspayments.com/v2/standard"></script>
-<!-- 다음 주소 검색 -->
-<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<!-- 다음 주소 검색은 클릭 시 동적 로딩 -->
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
@@ -1266,8 +1265,35 @@ function calcResPrice() {
   document.getElementById('rc-total').textContent=`${total.toLocaleString()}원`;
   resData.months=months; resData.rentalAmt=rentalAmt; resData.total=total;
 }
-function openAddressSearch() {
-  if (window.daum && daum.Postcode) {
+let daumPostcodeLoader = null;
+function loadDaumPostcode() {
+  if (window.daum && window.daum.Postcode) return Promise.resolve();
+  if (daumPostcodeLoader) return daumPostcodeLoader;
+  daumPostcodeLoader = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-daum-postcode=\"1\"]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('load failed')), { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    script.defer = true;
+    script.dataset.daumPostcode = '1';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('load failed'));
+    document.head.appendChild(script);
+    setTimeout(() => {
+      if (window.daum && window.daum.Postcode) resolve();
+      else reject(new Error('load timeout'));
+    }, 8000);
+  });
+  return daumPostcodeLoader;
+}
+async function openAddressSearch() {
+  try {
+    await loadDaumPostcode();
     new daum.Postcode({
       oncomplete: function(data) {
         const addr = data.roadAddress || data.jibunAddress || '';
@@ -1276,10 +1302,11 @@ function openAddressSearch() {
         const d2 = document.getElementById('r-addr2');
         if (d2) d2.focus();
       }
-    }).open();
-    return;
+    }).open({ popupName: 'bebecaAddressSearch' });
+  } catch (e) {
+    console.warn('Address search unavailable:', e);
+    showToast('주소 검색을 불러오지 못했어요. 주소를 직접 입력해주세요.');
   }
-  showToast('주소 검색을 불러오지 못했어요. 주소를 직접 입력해주세요.');
 }
 function fillRecentAddress() {
   const a1 = ls.get('bb_addr1') || '';
