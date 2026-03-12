@@ -417,7 +417,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <div class="banner">
         <div class="banner-tag">PRE-RESERVATION OPEN</div>
         <div class="banner-title">7월 서비스 시작<br>유모차 사전예약 진행 중</div>
-        <div class="banner-sub">지금 예약하면 7월부터 순차 배송 안내</div>
+        <div class="banner-sub">사전예약 후 정식 가입 시 첫 달 무료 혜택 제공</div>
         <div class="banner-emoji">🍼</div>
       </div>
     </div>
@@ -495,6 +495,35 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
         <input class="fi" id="r-addr1" type="text" placeholder="도로명 주소" style="margin-bottom:8px" onclick="fakeAddrSearch()">
         <input class="fi" id="r-addr2" type="text" placeholder="상세 주소 (동/호수)">
       </div>
+      <div class="fi-row">
+        <div class="fg">
+          <label class="fl">아이 연령대 <span style="color:var(--accent);font-weight:700;text-transform:none">*</span></label>
+          <select class="fi" id="r-baby-age">
+            <option value="">선택</option>
+            <option>임신 중</option>
+            <option>0~3개월</option>
+            <option>4~6개월</option>
+            <option>7~12개월</option>
+            <option>13~24개월</option>
+            <option>25개월 이상</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">주 이용 지역 <span style="color:var(--accent);font-weight:700;text-transform:none">*</span></label>
+          <select class="fi" id="r-use-area">
+            <option value="">선택</option>
+            <option>강남/서초/송파</option>
+            <option>마포/용산/중구</option>
+            <option>강서/양천/영등포</option>
+            <option>노원/도봉/강북</option>
+            <option>경기 남부</option>
+            <option>경기 북부</option>
+            <option>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">추천코드 (선택)</label><input class="fi" id="r-ref-code" type="text" placeholder="예) FRIEND2026"></div>
+      <div class="fi-hint" style="margin-top:-8px;margin-bottom:12px;color:var(--gray2)">📊 위 항목은 사전예약 수요 검증을 위한 최소 설문입니다.</div>
       <div class="fg"><label class="fl">요청사항 (선택)</label><textarea class="fi" id="r-note" rows="3" placeholder="예) 배송 전 연락 부탁드립니다"></textarea></div>
       <div class="info-notice" style="margin-bottom:16px"><span>⚠️</span><span>서울 일부 지역만 배송 가능합니다. 정확한 배송 가능 여부는 예약 후 확인 드립니다.</span></div>
       <div class="sec-title" style="padding:0;margin-bottom:10px">요금 계산</div>
@@ -566,7 +595,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   <div class="success-screen">
     <div class="success-ico">✅</div>
     <div class="success-title">사전예약 완료!</div>
-    <div class="success-sub">7월부터 서비스가 시작됩니다.<br>오픈 일정에 맞춰 운영팀에서 안내드릴게요 😊</div>
+    <div class="success-sub">7월부터 서비스가 시작됩니다.<br>사전예약 고객이 정식 가입하면 첫 달 무료 혜택을 드려요 🎁</div>
     <div class="receipt" id="comp-receipt"></div>
     <div class="next-steps">
       <div class="ns-title">다음 단계 안내</div>
@@ -1187,6 +1216,9 @@ function gotoReserve() {
   document.getElementById('r-end').value = '';
   document.getElementById('r-addr1').value = ls.get('bb_addr1')||'';
   document.getElementById('r-addr2').value = ls.get('bb_addr2')||'';
+  document.getElementById('r-baby-age').value = '';
+  document.getElementById('r-use-area').value = '';
+  document.getElementById('r-ref-code').value = '';
   document.getElementById('r-note').value = '';
   calcResPrice();
   document.getElementById('res-back').onclick = () => go('detail');
@@ -1217,13 +1249,19 @@ function fakeAddrSearch() {
 function gotoPayment() {
   const start=document.getElementById('r-start').value;
   const addr1=document.getElementById('r-addr1').value.trim();
+  const babyAge=document.getElementById('r-baby-age').value;
+  const useArea=document.getElementById('r-use-area').value;
+  const refCode=document.getElementById('r-ref-code').value.trim().toUpperCase();
   if(!start) return showToast('렌탈 시작일을 선택해주세요');
   if(start < RESERVATION_OPEN_DATE) return showToast(`렌탈 시작일은 ${RESERVATION_OPEN_DATE}부터 선택할 수 있어요`);
   if(!addr1) return showToast('배송 주소를 입력해주세요');
+  if(!babyAge) return showToast('아이 연령대를 선택해주세요');
+  if(!useArea) return showToast('주 이용 지역을 선택해주세요');
   let end=document.getElementById('r-end').value;
   if(!end){const d=new Date(start);d.setMonth(d.getMonth()+resData.months);end=d.toISOString().split('T')[0];}
   resData.start=start; resData.end=end;
   resData.addr=addr1+(document.getElementById('r-addr2').value.trim()?' '+document.getElementById('r-addr2').value.trim():'');
+  resData.babyAge=babyAge; resData.useArea=useArea; resData.refCode=refCode;
   resData.note=document.getElementById('r-note').value;
   saveAndComplete('PR' + Date.now().toString());
 }
@@ -1291,7 +1329,7 @@ function saveAndComplete(orderId) {
     id: orderId || 'PR'+Date.now(), userId: me?.id || '',
     prodId: selProd.id, prodName: selProd.name,
     start: resData.start, end: resData.end, months: resData.months,
-    addr: resData.addr, note: resData.note,
+    addr: resData.addr, babyAge: resData.babyAge, useArea: resData.useArea, refCode: resData.refCode, note: resData.note,
     rentalAmt: resData.rentalAmt, deposit: selProd.deposit, total: resData.total,
     requestedAt: new Date().toLocaleString('ko-KR'), status: '예약접수',
     payMethod: selectedPayMethod
@@ -1301,6 +1339,9 @@ function saveAndComplete(orderId) {
     <div class="rc-row"><span class="rc-l">예약번호</span><span style="font-size:12px">${rental.id.slice(-12)}</span></div>
     <div class="rc-row"><span class="rc-l">상품명</span><span>${rental.prodName}</span></div>
     <div class="rc-row"><span class="rc-l">렌탈 기간</span><span>${rental.start} ~ ${rental.end}</span></div>
+    <div class="rc-row"><span class="rc-l">아이 연령대</span><span>${rental.babyAge || '-'}</span></div>
+    <div class="rc-row"><span class="rc-l">주 이용 지역</span><span>${rental.useArea || '-'}</span></div>
+    ${rental.refCode ? `<div class="rc-row"><span class="rc-l">추천코드</span><span>${rental.refCode}</span></div>` : ''}
     <div class="rc-row"><span class="rc-l">배송 주소</span><span style="font-size:12px;text-align:right;max-width:150px">${rental.addr}</span></div>
     <div class="rc-row"><span class="rc-l">예상 결제 금액</span><span>${rental.total.toLocaleString()}원</span></div>
   `;
