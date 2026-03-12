@@ -174,6 +174,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .pc{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform 0.15s;}
 .pc:active{transform:scale(0.99);}
 .pc-hero{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.prod-photo{width:100%;height:100%;object-fit:cover;display:block;}
 .pc-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;}
 .pc-avail{position:absolute;top:12px;right:12px;}
 .pc-body{padding:14px 16px 16px;}
@@ -190,6 +191,8 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .img-slider{position:relative;height:280px;background:var(--gray4);overflow:hidden;flex-shrink:0;}
 .img-slider .slides{display:flex;height:100%;transition:transform 0.3s ease;}
 .img-slider .slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.slider-photo{width:100%;height:100%;object-fit:contain;display:block;background:#fff;}
+.thumb-photo{display:block;object-fit:cover;}
 .slider-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
 .sdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.5);transition:all 0.2s;cursor:pointer;}
 .sdot.on{background:#fff;width:18px;border-radius:3px;}
@@ -752,6 +755,12 @@ const PRODS = [
     desc:'어떤 지형도 부드럽게. Bugaboo 플래그십 디럭스 모델로 완전한 서스펜션과 원핸드 편의성을 갖췄습니다.',
     features:[{i:'🏔️',t:'풀 서스펜션 — 어떤 노면도 부드럽게'},{i:'✋',t:'원핸드 폴딩·리클라이닝·캐노피 조절'},{i:'🍼',t:'신생아 바시넷 + 유아 시트 2in1'},{i:'☀️',t:'UPF 50+ 대형 캐노피 (10cm 연장)'},{i:'♻️',t:'바이오 기반 소재, CO₂ 20% 절감'},{i:'🧺',t:'대용량 언더시트 바구니 최대 10kg'}],
     components:['본체 프레임','유아 시트','신생아 바시넷','레인커버','컵홀더'],
+    imageMain:'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw06bac950/Fox%205%20Renew%20PEP%20and%20touchpoints/image%20105%20(1).jpg?sw=1400',
+    imageSlides:[
+      'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw06bac950/Fox%205%20Renew%20PEP%20and%20touchpoints/image%20105%20(1).jpg?sw=1400',
+      'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw13becd6d/Fox%205%20Renew%20PEP%20and%20touchpoints/header%20(1).jpg?sw=1400',
+      'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw103f910f/Fox%205%20Renew%20PEP%20and%20touchpoints/Hero%20banner%20(9)%20(1).jpg?sw=1200'
+    ],
     slideBg:['#1C1C2E','#2D2D50','#1a1a30']
   },
   {
@@ -762,6 +771,12 @@ const PRODS = [
     desc:'세계 유일 싱글→더블 전환. 아이가 늘어도 확장 키트 하나로 쌍둥이·형제 동시 탑승이 가능합니다.',
     features:[{i:'👶',t:'싱글 → 더블 원스텝 확장'},{i:'🔄',t:'양방향 시트 — 부모향/전방향'},{i:'🧳',t:'XXL 사이드 바구니 (양측)'},{i:'🍼',t:'바시넷 2개 동시 장착 가능'},{i:'🌧️',t:'레인커버 기본 포함'},{i:'⚙️',t:'균형 잡힌 독립 서스펜션'}],
     components:['본체 프레임','유아 시트 2개','신생아 바시넷 2개','레인커버','사이드 바구니'],
+    imageMain:'https://www.bugaboo.com/on/demandware.static/-/Sites-bugaboo-master/default/dw2908561e/images/PV004616/Bugaboo-Donkey-5-Mono-bassinet-and-seat-stroller-graphite-base-grey-melange-fabrics-morning-pink-sun-canopy-x-PV004616-01.png',
+    imageSlides:[
+      'https://www.bugaboo.com/on/demandware.static/-/Sites-bugaboo-master/default/dw2908561e/images/PV004616/Bugaboo-Donkey-5-Mono-bassinet-and-seat-stroller-graphite-base-grey-melange-fabrics-morning-pink-sun-canopy-x-PV004616-01.png',
+      'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw91344994/single-to-double.jpg?sw=1200&sfrm=png&q=85&bgcolor=ffffff',
+      'https://www.bugaboo.com/dw/image/v2/BDLP_PRD/on/demandware.static/-/Library-Sites-BugabooSharedLibrary/default/dw6836290c/Strollers/donkey-6/navigation/bugaboo-donkey-6-lifestyle-flyout-1080x1080.png?sw=1200'
+    ],
     slideBg:['#1B4332','#2D6A4F','#155d38']
   },
   {
@@ -772,6 +787,12 @@ const PRODS = [
     desc:'노르웨이 감성 + 아이와의 소통 설계. 업계 최고 높이 시트로 부모와 아이의 눈 맞춤을 우선시합니다.',
     features:[{i:'🪑',t:'업계 최고 높이 시트 (지면 60cm)'},{i:'🔼',t:'8단계 핸들 높이 조절'},{i:'👁️',t:'부모-아이 아이컨택 최우선 설계'},{i:'🔄',t:'리버서블 시트 — 전방/부모향'},{i:'🌿',t:'친환경 세탁 가능 패브릭'},{i:'🎨',t:'50+ 컬러 커스터마이징'}],
     components:['본체 프레임','유아 시트','신생아 인서트','레인커버','컵홀더'],
+    imageMain:'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw721ce717/images/inriverimages/mainview/Xplory-X_ModernGrey_Seat_200917_09_isolated_eCom.jpg',
+    imageSlides:[
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw721ce717/images/inriverimages/mainview/Xplory-X_ModernGrey_Seat_200917_09_isolated_eCom.jpg',
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw721ce717/images/inriverimages/mainview/Xplory-X_ModernGrey_Seat_200917_09_isolated_eCom.jpg',
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw721ce717/images/inriverimages/mainview/Xplory-X_ModernGrey_Seat_200917_09_isolated_eCom.jpg'
+    ],
     slideBg:['#3E1F00','#5a2d00','#6B3400']
   },
   {
@@ -782,6 +803,12 @@ const PRODS = [
     desc:'✈️ 비행기 기내 반입 가능한 유일한 프리미엄 유모차. 1초 폴딩으로 여행 부담 없이.',
     features:[{i:'✈️',t:'기내 반입 가능 (IATA 규격 인증)'},{i:'⚡',t:'1초 원핸드 폴딩 · 원터치 오픈'},{i:'🪶',t:'초경량 6.2kg'},{i:'💺',t:'풀리클라인 시트 (완전 수평)'},{i:'☀️',t:'UPF 50+ 캐노피'},{i:'🎒',t:'여행용 캐리 스트랩 포함'}],
     components:['본체 프레임','시트 패드','캐노피','레인커버','캐리 스트랩'],
+    imageMain:'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw5069cdec/images/inriverimages/mainview/YOYO_3in1_Bundle_NewbornPack_Ecom.jpg',
+    imageSlides:[
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw5069cdec/images/inriverimages/mainview/YOYO_3in1_Bundle_NewbornPack_Ecom.jpg',
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw927e40ca/images/inriverimages/mainview/YOYO3_6PLUS_Connect_Olive_BlackFrame_3-4_501.jpg',
+      'https://www.stokke.com/on/demandware.static/-/Sites-stokke-master-catalog/default/dw23fceedc/images/inriverimages/mainview/YOYO3_CONNECT_Olive_Newborn_6PLUS_BlackFrame_3-4_0519%201.jpg'
+    ],
     slideBg:['#0D2137','#0d3a6b','#1565C0']
   }
 ];
@@ -1072,6 +1099,18 @@ function getSVG(id, accent) {
   };
   return svgs[id] || '';
 }
+function renderCardHero(p) {
+  if(p.imageMain) {
+    return `<img class="prod-photo" src="${p.imageMain}" alt="${p.name}" loading="lazy" referrerpolicy="no-referrer">`;
+  }
+  return getSVG(p.id, p.accent);
+}
+function renderMiniThumb(p, size=56) {
+  if(p?.imageMain) {
+    return `<div style="width:${size}px;height:${size}px;border-radius:10px;background:${p.bgGrad};overflow:hidden;flex-shrink:0"><img class="thumb-photo" src="${p.imageMain}" alt="${p.name}" loading="lazy" referrerpolicy="no-referrer" style="width:${size}px;height:${size}px"></div>`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:10px;background:${p.bgGrad};overflow:hidden;flex-shrink:0"><svg viewBox="10 25 140 105" style="width:${size}px;height:${size}px">${getSVG(p.id,p.accent).replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></div>`;
+}
 
 /* ═══════════════════════════════════════
    HOME
@@ -1081,7 +1120,7 @@ function renderHome() {
   list.innerHTML = PRODS.map(p => `
     <div class="pc" onclick="openDetail(${p.id})">
       <div class="pc-hero" style="background:${p.bgGrad}">
-        ${getSVG(p.id, p.accent)}
+        ${renderCardHero(p)}
         <div class="pc-badges">${p.tags.slice(0,2).map(t=>`<span class="badge" style="background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9)">${t}</span>`).join('')}</div>
         <div class="pc-avail"><span class="badge" style="background:${p.available?'rgba(45,122,79,0.85)':'rgba(198,40,40,0.85)'};color:#fff">${p.available?'● 예약 가능':'● 품절'}</span></div>
       </div>
@@ -1110,6 +1149,7 @@ function renderDetail(p) {
   document.getElementById('d-avail-badge').innerHTML = `<span class="badge ${p.available?'b-green':'b-red'}">${p.available?'✅ 예약 가능':'❌ 현재 품절'}</span>`;
   const inner = document.getElementById('slider-inner');
   inner.innerHTML = p.slideBg.map((bg,i) => `<div class="slide" style="background:${bg}">${
+    (p.imageSlides && p.imageSlides[i]) ? `<img class="slider-photo" src="${p.imageSlides[i]}" alt="${p.name} 이미지 ${i+1}" loading="lazy" referrerpolicy="no-referrer">` :
     i===0 ? getSVG(p.id, p.accent) :
     i===1 ? `<div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">특징</div>${p.tags.map(t=>`<span style="background:rgba(255,255,255,0.15);color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;font-weight:600">${t}</span>`).join('')}</div>` :
     `<div style="text-align:center;padding:24px 20px"><div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">스펙</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;color:#fff"><div style="font-size:11px;opacity:0.7">무게</div><div style="font-weight:700;margin-top:4px">${p.weight}</div></div><div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;color:#fff"><div style="font-size:11px;opacity:0.7">최대하중</div><div style="font-weight:700;margin-top:4px">${p.maxLoad}</div></div><div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;color:#fff"><div style="font-size:11px;opacity:0.7">사용연령</div><div style="font-weight:700;margin-top:4px">${p.ageRange.split(' ')[0]}</div></div><div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;color:#fff"><div style="font-size:11px;opacity:0.7">바퀴</div><div style="font-weight:700;margin-top:4px">${p.wheel}</div></div></div></div>`
@@ -1141,7 +1181,7 @@ function gotoReserve() {
   if(!me) return showToast('로그인이 필요해요');
   if(!selProd) return;
   const p = selProd;
-  document.getElementById('res-thumb').innerHTML = `<div style="width:56px;height:56px;border-radius:12px;background:${p.bgGrad};overflow:hidden;display:flex;align-items:center;justify-content:center"><svg viewBox="20 30 120 100" style="width:56px;height:56px">${getSVG(p.id,p.accent).replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></div>`;
+  document.getElementById('res-thumb').innerHTML = renderMiniThumb(p,56);
   document.getElementById('res-prod-name').textContent = p.name;
   document.getElementById('res-prod-price').textContent = `${p.price.toLocaleString()}원/월 · 보증금 ${p.deposit.toLocaleString()}원`;
   const today = new Date().toISOString().split('T')[0];
@@ -1335,7 +1375,7 @@ function renderHistory() {
   const sorted = [...all].sort((a,b) => b.id.localeCompare(a.id));
   container.innerHTML = sorted.map(r => {
     const p = PRODS.find(x => x.id === r.prodId);
-    const th = p ? `<div style="width:52px;height:52px;border-radius:10px;background:${p.bgGrad};overflow:hidden;flex-shrink:0"><svg viewBox="10 25 140 105" style="width:52px;height:52px">${getSVG(p.id,p.accent).replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></div>` : `<div style="width:52px;height:52px;border-radius:10px;background:var(--gray4);flex-shrink:0"></div>`;
+    const th = p ? renderMiniThumb(p,52) : `<div style="width:52px;height:52px;border-radius:10px;background:var(--gray4);flex-shrink:0"></div>`;
     let acts='';
     if(r.status==='예약접수') acts=`<button class="btn btn-s btn-sm" onclick="event.stopPropagation();cancelRental('${r.id}')">예약 취소</button>`;
     else if(r.status==='이용중') acts=`<button class="btn btn-green btn-sm" onclick="event.stopPropagation();openReturn('${r.id}')">반납 신청</button>`;
