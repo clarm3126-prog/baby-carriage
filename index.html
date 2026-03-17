@@ -317,7 +317,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
     <div class="auth-sub">휴대폰 번호로 간편하게<br>시작하세요</div>
 
     <!-- 카카오 로그인 -->
-    <button class="btn btn-kakao" onclick="kakaoLogin()" id="kakao-login-btn">
+    <button class="btn btn-kakao" onclick="kakaoLogin('login')" id="kakao-login-btn">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C5.58 2 2 4.9 2 8.47c0 2.27 1.49 4.26 3.74 5.38L4.8 17.2a.3.3 0 00.45.34l4.1-2.73c.22.02.44.03.66.03 4.42 0 8-2.9 8-6.47S14.42 2 10 2z" fill="black" opacity="0.9"/></svg>
       카카오로 시작하기
     </button>
@@ -358,7 +358,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
     <div class="auth-sub">최소 정보만 입력하면 바로 이용 가능해요</div>
 
     <!-- 카카오 가입 -->
-    <button class="btn btn-kakao" onclick="kakaoLogin()">
+    <button class="btn btn-kakao" onclick="kakaoLogin('signup')">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C5.58 2 2 4.9 2 8.47c0 2.27 1.49 4.26 3.74 5.38L4.8 17.2a.3.3 0 00.45.34l4.1-2.73c.22.02.44.03.66.03 4.42 0 8-2.9 8-6.47S14.42 2 10 2z" fill="black" opacity="0.9"/></svg>
       카카오로 간편 가입
     </button>
@@ -499,6 +499,10 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       </div>
       <div class="fi-hint" style="margin-top:-10px;margin-bottom:16px;color:var(--gray2)">📌 종료일 미입력 시 자동 1개월 설정</div>
       <div class="fg">
+        <label class="fl">휴대전화 <span style="color:var(--accent);font-weight:700;text-transform:none">*</span></label>
+        <input class="fi" id="r-phone" type="tel" placeholder="010-0000-0000" oninput="formatPhone(this)">
+      </div>
+      <div class="fg">
         <label class="fl">배송 주소</label>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <input class="fi" id="r-addr1" type="text" placeholder="도로명 주소" autocomplete="street-address" style="flex:1;margin-bottom:0">
@@ -627,6 +631,10 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
     <div class="fg">
       <label class="fl">상세 주소</label>
       <input class="fi" id="c-addr2" type="text" placeholder="동/호수">
+    </div>
+    <div class="fg">
+      <label class="fl">휴대전화</label>
+      <input class="fi" id="c-phone" type="tel" placeholder="010-0000-0000" oninput="formatPhone(this)">
     </div>
     <div class="fg">
       <label class="fl">유모차 구매 시기</label>
@@ -881,6 +889,8 @@ const ls = {
 };
 const getRentals = () => ls.getArr('bb_rentals');
 const saveRentals = r => ls.set('bb_rentals', r);
+const getSessionPhone = () => (ls.get('bb_guest_phone') || '').toString();
+const getSessionUserId = () => me?.id || getSessionPhone() || 'guest';
 
 /* ═══════════════════════════════════════
    LOADING
@@ -932,7 +942,49 @@ function initKakao() {
   } catch(e) { console.warn('Kakao SDK init failed:', e); }
 }
 
-function kakaoLogin() {
+function getApiBase() {
+  return (CONFIG.API_BASE || '').replace(/\/$/, '');
+}
+
+async function saveMemberProfile(member, options = {}) {
+  if(!member?.id) return { ok: false, skipped: true, reason: 'missing member id' };
+  const payload = {
+    memberUid: member.id,
+    provider: member.loginType === 'kakao' ? 'kakao' : 'sms',
+    providerUserId: options.providerUserId || member.id,
+    name: member.name || '',
+    phone: member.phone || '',
+    email: member.email || '',
+    marketingOptIn: Boolean(options.marketingOptIn),
+    authFlow: options.authFlow || 'login',
+    requestedAt: new Date().toISOString(),
+  };
+
+  const endpoint = `${getApiBase()}/api/members`;
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok || !data.ok) throw new Error(data?.message || 'member save failed');
+    return data;
+  } catch (e) {
+    console.warn('Member profile save failed:', e);
+    return { ok: false, message: e.message || 'member save failed' };
+  }
+}
+
+function upsertLocalUser(user) {
+  const users = ls.getArr('bb_users');
+  const idx = users.findIndex(u => u.id === user.id || (u.phone && u.phone === user.phone));
+  if(idx >= 0) users[idx] = { ...users[idx], ...user };
+  else users.push(user);
+  ls.set('bb_users', users);
+}
+
+function kakaoLogin(authFlow = 'login') {
   if(!window.Kakao || !Kakao.isInitialized()) {
     showToast('⚠️ CONFIG에 KAKAO_JS_KEY를 입력해주세요');
     return;
@@ -940,10 +992,10 @@ function kakaoLogin() {
   showLoading('카카오 로그인 중...');
   Kakao.Auth.login({
     scope: 'profile_nickname,profile_image,account_email',
-    success(authObj) {
+    success() {
       Kakao.API.request({
         url: '/v2/user/me',
-        success(res) {
+        async success(res) {
           hideLoading();
           const kakaoAccount = res.kakao_account;
           const profile = kakaoAccount?.profile;
@@ -955,8 +1007,14 @@ function kakaoLogin() {
             avatar: profile?.profile_image_url || '',
             loginType: 'kakao'
           };
+          upsertLocalUser(me);
           ls.set('bb_me', me);
-          afterLogin('카카오 로그인');
+          await saveMemberProfile(me, {
+            authFlow,
+            providerUserId: String(res.id),
+            marketingOptIn: authFlow === 'signup' ? termState.t3 : false,
+          });
+          afterLogin(authFlow === 'signup' ? '가입 완료' : '카카오 로그인');
         },
         fail(err) { hideLoading(); showToast('카카오 정보 조회 실패: ' + err.msg); }
       });
@@ -1082,12 +1140,15 @@ async function doSMSLogin() {
   const clean = ph.replace(/-/g,'');
   const users = ls.getArr('bb_users');
   let user = users.find(u => u.phone === clean);
+  let isNew = false;
   if(!user) {
     user = { id: 'sms_'+clean, name: '회원', phone: clean, email: '', loginType: 'sms' };
     users.push(user); ls.set('bb_users', users);
+    isNew = true;
   }
   me = user; ls.set('bb_me', me);
-  afterLogin('로그인');
+  await saveMemberProfile(me, { authFlow: isNew ? 'signup' : 'login', providerUserId: clean, marketingOptIn: false });
+  afterLogin(isNew ? '가입 완료' : '로그인');
 }
 
 /* Signup OTP flow */
@@ -1112,6 +1173,7 @@ async function doSignup() {
   if(users.find(u => u.phone === clean)) return showToast('이미 가입된 번호예요');
   me = { id: 'sms_'+clean, name, phone: clean, email, loginType: 'sms' };
   users.push(me); ls.set('bb_users', users); ls.set('bb_me', me);
+  await saveMemberProfile(me, { authFlow: 'signup', providerUserId: clean, marketingOptIn: termState.t3 });
   afterLogin('가입 완료');
 }
 
@@ -1213,14 +1275,14 @@ function renderDetail(p) {
   document.getElementById('d-components').innerHTML = `<div class="cb-title">📦 기본 구성품</div><div class="cb-items">${p.components.map(c=>`<span class="cb-chip">${c}</span>`).join('')}</div>`;
   const btn = document.getElementById('d-reserve-btn');
   btn.disabled = !p.available; btn.textContent = p.available ? '예약하기' : '현재 품절';
-  const wl = ls.getArr('bb_wish_'+(me?.id||''));
+  const wl = ls.getArr('bb_wish_'+getSessionUserId());
   document.getElementById('wish-btn').textContent = wl.includes(p.id) ? '❤️' : '🤍';
 }
 function slide(dir) { if(!selProd) return; sliderIdx=(sliderIdx+dir+selProd.slideBg.length)%selProd.slideBg.length; document.getElementById('slider-inner').style.transform=`translateX(-${sliderIdx*100}%)`; document.querySelectorAll('.sdot').forEach((d,i)=>d.classList.toggle('on',i===sliderIdx)); }
 function goSlide(i) { sliderIdx=i; document.getElementById('slider-inner').style.transform=`translateX(-${i*100}%)`; document.querySelectorAll('.sdot').forEach((d,j)=>d.classList.toggle('on',j===i)); }
 function toggleWish() {
-  if(!me) return showToast('로그인이 필요해요');
-  const k='bb_wish_'+me.id; const wl=ls.getArr(k); const idx=wl.indexOf(selProd.id);
+  const sid = getSessionUserId();
+  const k='bb_wish_'+sid; const wl=ls.getArr(k); const idx=wl.indexOf(selProd.id);
   if(idx===-1){wl.push(selProd.id);ls.set(k,wl);document.getElementById('wish-btn').textContent='❤️';showToast('찜 목록에 추가됐어요 ❤️');}
   else{wl.splice(idx,1);ls.set(k,wl);document.getElementById('wish-btn').textContent='🤍';showToast('찜 목록에서 제거됐어요');}
 }
@@ -1230,7 +1292,6 @@ function toggleWish() {
 ═══════════════════════════════════════ */
 const RESERVATION_OPEN_DATE = '2026-07-01';
 function gotoReserve() {
-  if(!me) return showToast('로그인이 필요해요');
   if(!selProd) return;
   const p = selProd;
   document.getElementById('res-thumb').innerHTML = renderMiniThumb(p,56);
@@ -1242,6 +1303,7 @@ function gotoReserve() {
   document.getElementById('r-end').min = minStart;
   document.getElementById('r-start').value = '';
   document.getElementById('r-end').value = '';
+  document.getElementById('r-phone').value = ls.get('bb_guest_phone') || '';
   document.getElementById('r-addr1').value = ls.get('bb_addr1')||'';
   document.getElementById('r-addr2').value = ls.get('bb_addr2')||'';
   document.getElementById('r-baby-age').value = '';
@@ -1356,6 +1418,7 @@ async function submitPreorderToServer(payload) {
 }
 async function gotoPayment() {
   const start=document.getElementById('r-start').value;
+  const phone=(document.getElementById('r-phone').value || '').replace(/\D/g,'');
   const addr1=document.getElementById('r-addr1').value.trim();
   const babyAge=document.getElementById('r-baby-age').value;
   const useAreaBase=document.getElementById('r-use-area').value;
@@ -1365,6 +1428,7 @@ async function gotoPayment() {
   const refSourceEtc=(document.getElementById('r-ref-source-etc').value || '').trim();
   const refCode = refSourceBase === '기타' ? refSourceEtc : refSourceBase;
   if(!start) return showToast('렌탈 시작일을 선택해주세요');
+  if(phone.length < 10) return showToast('휴대전화 번호를 입력해주세요');
   if(start < RESERVATION_OPEN_DATE) return showToast(`렌탈 시작일은 ${RESERVATION_OPEN_DATE}부터 선택할 수 있어요`);
   if(!addr1) return showToast('배송 주소를 입력해주세요');
   if(!babyAge) return showToast('아이 연령대를 선택해주세요');
@@ -1376,6 +1440,8 @@ async function gotoPayment() {
   resData.start=start; resData.end=end;
   const addr2 = document.getElementById('r-addr2').value.trim();
   resData.addr=addr1+(addr2?' '+addr2:'');
+  resData.phone = phone;
+  ls.set('bb_guest_phone', phone);
   ls.set('bb_addr1', addr1);
   ls.set('bb_addr2', addr2);
   resData.babyAge=babyAge; resData.useArea=useArea; resData.refCode=refCode;
@@ -1384,7 +1450,8 @@ async function gotoPayment() {
   const orderId = 'PR' + Date.now().toString();
   const payload = {
     orderId,
-    userId: me?.id || '',
+    userId: phone,
+    phone,
     prodId: selProd.id,
     prodName: selProd.name,
     start: resData.start,
@@ -1416,7 +1483,7 @@ async function gotoPayment() {
 
 function saveAndComplete(orderId) {
   const rental = {
-    id: orderId || 'PR'+Date.now(), userId: me?.id || '',
+    id: orderId || 'PR'+Date.now(), userId: resData.phone || getSessionUserId(),
     prodId: selProd.id, prodName: selProd.name,
     start: resData.start, end: resData.end, months: resData.months,
     addr: resData.addr, babyAge: resData.babyAge, useArea: resData.useArea, refCode: resData.refCode, note: resData.note,
@@ -1430,6 +1497,7 @@ function saveAndComplete(orderId) {
     <div class="rc-row"><span class="rc-l">렌탈 기간</span><span>${rental.start} ~ ${rental.end}</span></div>
     <div class="rc-row"><span class="rc-l">아이 연령대</span><span>${rental.babyAge || '-'}</span></div>
     <div class="rc-row"><span class="rc-l">주 이용 지역</span><span>${rental.useArea || '-'}</span></div>
+    <div class="rc-row"><span class="rc-l">연락처</span><span>${rental.userId || '-'}</span></div>
     ${rental.refCode ? `<div class="rc-row"><span class="rc-l">유입 경로</span><span>${rental.refCode}</span></div>` : ''}
     <div class="rc-row"><span class="rc-l">배송 주소</span><span style="font-size:12px;text-align:right;max-width:150px">${rental.addr}</span></div>
     <div class="rc-row"><span class="rc-l">예상 결제 금액</span><span>${rental.total.toLocaleString()}원</span></div>
@@ -1443,8 +1511,9 @@ function saveAndComplete(orderId) {
 const STATUS_LABELS = ['예약접수','배송준비중','배송완료','이용중','반납요청','반납완료'];
 const STATUS_BADGE = {'예약접수':'b-yellow','배송준비중':'b-blue','배송완료':'b-blue','이용중':'b-green','반납요청':'b-orange','반납완료':'b-gray'};
 function renderHistory() {
-  const all = getRentals().filter(r => r.userId===(me?.id||''));
-  const cleanings = ls.getArr('bb_cleanings').filter(c => c.userId === (me?.id||''));
+  const sid = getSessionUserId();
+  const all = getRentals().filter(r => r.userId===sid);
+  const cleanings = ls.getArr('bb_cleanings').filter(c => c.userId === sid);
   const container = document.getElementById('history-list'); if(!container) return;
   if(!all.length && !cleanings.length) { container.innerHTML = `<div class="empty"><div class="empty-ico">📭</div><div class="empty-t">예약 내역이 없어요</div><div class="empty-s">유모차를 렌탈해보세요!</div></div>`; return; }
   const sorted = [...all].sort((a,b) => b.id.localeCompare(a.id));
@@ -1482,31 +1551,34 @@ function renderClean() {
   const dateEl = document.getElementById('c-date');
   const addr1El = document.getElementById('c-addr1');
   const addr2El = document.getElementById('c-addr2');
+  const phoneEl = document.getElementById('c-phone');
   const purchaseEl = document.getElementById('c-purchase-period');
-  if(!dateEl || !addr1El || !addr2El || !purchaseEl) return;
+  if(!dateEl || !addr1El || !addr2El || !phoneEl || !purchaseEl) return;
   const today = new Date().toISOString().split('T')[0];
   dateEl.min = today;
   if(!dateEl.value) dateEl.value = today;
   if(!addr1El.value) addr1El.value = ls.get('bb_addr1') || '';
   if(!addr2El.value) addr2El.value = ls.get('bb_addr2') || '';
+  if(!phoneEl.value) phoneEl.value = ls.get('bb_guest_phone') || '';
   if(!purchaseEl.value) purchaseEl.value = '';
 }
 
 function submitCleaningRequest() {
-  if(!me) return showToast('로그인이 필요해요');
   const date = (document.getElementById('c-date')?.value || '').trim();
+  const phone = (document.getElementById('c-phone')?.value || '').replace(/\D/g,'');
   const addr1 = (document.getElementById('c-addr1')?.value || '').trim();
   const addr2 = (document.getElementById('c-addr2')?.value || '').trim();
   const purchasePeriod = (document.getElementById('c-purchase-period')?.value || '').trim();
   const note = (document.getElementById('c-note')?.value || '').trim();
   if(!date) return showToast('수거 희망일을 선택해주세요');
+  if(phone.length < 10) return showToast('휴대전화 번호를 입력해주세요');
   if(!addr1) return showToast('주소를 입력해주세요');
   if(!purchasePeriod) return showToast('유모차 구매 시기를 선택해주세요');
   const req = {
     id: 'CL' + Date.now(),
-    userId: me.id,
-    name: me.name,
-    phone: me.phone || '',
+    userId: phone,
+    name: '',
+    phone,
     date,
     purchasePeriod,
     addr: addr1 + (addr2 ? ` ${addr2}` : ''),
@@ -1520,6 +1592,7 @@ function submitCleaningRequest() {
   ls.set('bb_cleanings', all);
   ls.set('bb_addr1', addr1);
   ls.set('bb_addr2', addr2);
+  ls.set('bb_guest_phone', phone);
   if(document.getElementById('c-purchase-period')) document.getElementById('c-purchase-period').value = '';
   if(document.getElementById('c-note')) document.getElementById('c-note').value = '';
   showToast('세척 서비스 예약이 완료됐어요. 운영팀에서 확인 후 연락드릴게요.');
@@ -1577,12 +1650,12 @@ function doReturn() {
    MYPAGE
 ═══════════════════════════════════════ */
 function renderMypage() {
-  if(!me) return;
   const avatarEl = document.getElementById('my-avatar');
-  if(me.avatar) { avatarEl.innerHTML=`<img src="${me.avatar}" alt="">`; avatarEl.style.background='transparent'; }
-  else { avatarEl.textContent=me.name.charAt(0); avatarEl.style.background='var(--accent)'; }
-  document.getElementById('my-name').textContent = me.name;
-  document.getElementById('my-sub').textContent = me.phone || me.email || (me.loginType==='kakao'?'카카오 로그인':'');
+  const phone = getSessionPhone();
+  if(me?.avatar) { avatarEl.innerHTML=`<img src="${me.avatar}" alt="">`; avatarEl.style.background='transparent'; }
+  else { avatarEl.textContent=(me?.name || '게').charAt(0); avatarEl.style.background='var(--accent)'; }
+  document.getElementById('my-name').textContent = me?.name || '게스트';
+  document.getElementById('my-sub').textContent = me?.phone || me?.email || phone || '휴대전화 입력 후 예약 가능';
 }
 function showAddrModal() {
   document.getElementById('my-addr').value=ls.get('bb_addr1')||'';
@@ -1597,15 +1670,10 @@ function closeModal(e,id) { if(e.target===document.getElementById(id)) document.
 ═══════════════════════════════════════ */
 (async function init() {
   initKakao();
-
-  // 자동 로그인 복원
+  // 로그인 단계 없이 홈에서 바로 시작
   const saved = ls.get('bb_me');
-  if(saved && saved.id) {
-    me = saved;
-    go('home'); navOn('home');
-  } else {
-    go('splash');
-  }
+  if(saved && saved.id) me = saved;
+  go('home'); navOn('home');
 })();
 </script>
 </body>

@@ -17,10 +17,12 @@
 </head>
 <body>
   <div class="card">
-    <h2>사전예약 관리자 조회</h2>
-    <p class="muted">`ADMIN_DASHBOARD_KEY`를 입력하면 최신 사전예약 목록을 조회합니다.</p>
+    <h2>베베카 관리자 조회</h2>
+    <p class="muted">`ADMIN_DASHBOARD_KEY`를 입력하면 사전예약/회원가입 목록을 조회합니다.</p>
     <input id="adminKey" type="password" placeholder="관리자 키" style="width:280px" />
-    <button onclick="loadPreorders()">조회</button>
+    <button onclick="switchMode('preorders')">사전예약</button>
+    <button onclick="switchMode('members')">회원가입</button>
+    <button onclick="loadCurrent()">조회</button>
     <button onclick="downloadCsv()">CSV 다운로드</button>
     <div id="status" class="muted" style="margin-top:8px"></div>
   </div>
@@ -47,17 +49,50 @@
 
   <script>
     let rows = [];
+    let mode = 'preorders';
+    const MODE = {
+      preorders: {
+        label: '사전예약',
+        endpoint: '/api/admin/preorders?limit=300',
+        cols: ['requested_at','order_id','product_name','start_date','end_date','baby_age','use_area','referral_code','address','total_amount']
+      },
+      members: {
+        label: '회원가입',
+        endpoint: '/api/admin/members?limit=300',
+        cols: ['created_at','member_uid','provider','name','phone','email','marketing_opt_in','auth_flow','last_login_at']
+      }
+    };
 
     function esc(v) {
       return String(v ?? '').replace(/[&<>\"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;', "'":'&#39;' }[c]));
     }
 
-    async function loadPreorders() {
+    function renderHeader() {
+      const cfg = MODE[mode];
+      document.querySelector('#tbl thead').innerHTML = `<tr>${cfg.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr>`;
+    }
+
+    function renderRows() {
+      const cfg = MODE[mode];
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML = rows.map(r => `<tr>${cfg.cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('');
+    }
+
+    function switchMode(next) {
+      if (!MODE[next]) return;
+      mode = next;
+      rows = [];
+      renderHeader();
+      document.querySelector('#tbl tbody').innerHTML = '';
+      document.getElementById('status').textContent = `${MODE[mode].label} 모드`;
+    }
+
+    async function loadCurrent() {
       const key = document.getElementById('adminKey').value.trim();
       if (!key) return alert('관리자 키를 입력하세요.');
       document.getElementById('status').textContent = '불러오는 중...';
 
-      const res = await fetch('/api/admin/preorders?limit=300', {
+      const res = await fetch(MODE[mode].endpoint, {
         headers: { 'x-admin-key': key }
       });
       const data = await res.json();
@@ -68,37 +103,24 @@
       }
 
       rows = data.items || [];
-      const tbody = document.querySelector('#tbl tbody');
-      tbody.innerHTML = rows.map(r => `
-        <tr>
-          <td>${esc(r.requested_at)}</td>
-          <td>${esc(r.order_id)}</td>
-          <td>${esc(r.product_name)}</td>
-          <td>${esc(r.start_date)}</td>
-          <td>${esc(r.end_date)}</td>
-          <td>${esc(r.baby_age)}</td>
-          <td>${esc(r.use_area)}</td>
-          <td>${esc(r.referral_code)}</td>
-          <td>${esc(r.address)}</td>
-          <td>${esc(r.total_amount)}</td>
-        </tr>
-      `).join('');
-
-      document.getElementById('status').textContent = `총 ${rows.length}건`;
+      renderRows();
+      document.getElementById('status').textContent = `${MODE[mode].label} 총 ${rows.length}건`;
     }
 
     function downloadCsv() {
       if (!rows.length) return alert('먼저 조회하세요.');
-      const cols = ['requested_at','order_id','product_name','start_date','end_date','baby_age','use_area','referral_code','address','total_amount'];
+      const cols = MODE[mode].cols;
       const lines = [cols.join(',')].concat(rows.map(r => cols.map(c => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(',')));
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `preorders_${new Date().toISOString().slice(0,10)}.csv`;
+      a.download = `${mode}_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     }
+
+    renderHeader();
   </script>
 </body>
 </html>

@@ -3,6 +3,8 @@
 ## 무엇이 추가됐나
 - `POST /api/preorders`: 사전예약 저장 + 카카오톡(나에게) 알림 전송
 - `GET /api/admin/preorders`: 관리자 목록 조회 API
+- `POST /api/members`: 회원가입/로그인 정보 저장 + 신규가입 카카오 알림 전송
+- `GET /api/admin/members`: 관리자 회원 목록 조회 API
 - `admin.html`: 관리자 조회/CSV 다운로드 페이지
 - `index.html`: 사전예약 완료 시 서버 API로 자동 전송
 
@@ -33,6 +35,24 @@ create table if not exists public.preorders (
 );
 
 create index if not exists idx_preorders_requested_at on public.preorders (requested_at desc);
+
+create table if not exists public.members (
+  id bigserial primary key,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  member_uid text unique not null,
+  provider text not null,
+  provider_user_id text,
+  name text,
+  phone text,
+  email text,
+  marketing_opt_in boolean default false,
+  auth_flow text,
+  last_login_at timestamptz
+);
+
+create index if not exists idx_members_created_at on public.members (created_at desc);
+create index if not exists idx_members_phone on public.members (phone);
 ```
 
 ## 2) Vercel 환경변수 설정
@@ -41,6 +61,7 @@ Vercel Project Settings > Environment Variables
 - `SUPABASE_URL` = `https://<project-ref>.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY` = Supabase service role key
 - `SUPABASE_TABLE` = `preorders` (기본값 동일, 생략 가능)
+- `SUPABASE_MEMBERS_TABLE` = `members` (기본값 동일, 생략 가능)
 - `ADMIN_DASHBOARD_KEY` = 관리자 조회용 임의 비밀키
 - `KAKAO_ACCESS_TOKEN` = 카카오톡 나에게 보내기 access token
 
@@ -62,5 +83,5 @@ Vercel Project Settings > Environment Variables
 - CSV 다운로드 가능
 
 ## 참고
-- API 파일: `api/preorders.js`, `api/admin/preorders.js`
+- API 파일: `api/preorders.js`, `api/admin/preorders.js`, `api/members.js`, `api/admin/members.js`
 - 관리자 페이지: `admin.html`
