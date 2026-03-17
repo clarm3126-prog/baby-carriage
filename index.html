@@ -414,9 +414,9 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
         <div class="hdr-region">📍<span>서울 배송 가능</span></div>
       </div>
       <div class="banner">
-        <div class="banner-tag">PRE-RESERVATION OPEN</div>
-        <div class="banner-title">7월 서비스 시작<br>유모차 사전예약 진행 중</div>
-        <div class="banner-sub">사전예약 후 정식 가입 시 첫 달 무료 혜택 제공</div>
+        <div class="banner-tag">HYGIENE FIRST</div>
+        <div class="banner-title">아기가 타는 유모차,<br>위생부터 다르게</div>
+        <div class="banner-sub">세척 · UV-C 살균 · 출고 전 재검수</div>
         <div class="banner-emoji">🍼</div>
       </div>
     </div>
@@ -450,7 +450,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <div class="detail-name" id="d-name"></div>
       <div class="detail-role" id="d-role"></div>
       <div class="info-notice" style="margin-bottom:10px"><span>ℹ️</span><span>베베카는 중고 유모차 대여 서비스입니다. 제품 상태/원단 색상/생활 스크래치 등은 사진과 실제가 일부 다를 수 있습니다.</span></div>
-      <div class="info-notice" style="margin-bottom:16px"><span>🧼</span><span>모든 제품은 출고 전 전문 세척, 소독 및 UV 살균을 거쳐 청결한 상태로 배송됩니다.</span></div>
+      <div class="info-notice" style="margin-bottom:16px"><span>🧼</span><span>세척 · UV-C 살균 · 출고 전 재검수 후 발송됩니다.</span></div>
       <div class="price-highlight">
         <div style="display:flex;align-items:baseline;gap:8px"><span class="ph-price" id="d-price"></span><span class="ph-unit">원 / 월</span></div>
         <div class="ph-deposit" id="d-deposit"></div>
@@ -464,9 +464,15 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <div class="sec-title">구성품</div>
       <div class="components-box" id="d-components"></div>
       <div class="divider-line"></div>
+      <div class="sec-title">3단계 위생 관리</div>
+      <div class="info-notice" style="margin-bottom:10px"><span>1️⃣</span><span>세척</span></div>
+      <div class="info-notice" style="margin-bottom:10px"><span>2️⃣</span><span>UV-C 살균</span></div>
+      <div class="info-notice" style="margin-bottom:16px"><span>3️⃣</span><span>출고 전 재검수</span></div>
+      <div class="info-notice" style="margin-bottom:16px"><span>✅</span><span>모든 제품 동일 기준 관리</span></div>
+      <div class="divider-line"></div>
       <div class="sec-title">배송 및 이용 정책</div>
       <div class="info-notice" style="margin-bottom:10px"><span>🚚</span><span>서울 전 지역 무료 배송 · 수거</span></div>
-      <div class="info-notice" style="margin-bottom:16px"><span>🧼</span><span>배송 전 전문 세척 · 점검 완료 후 발송</span></div>
+      <div class="info-notice" style="margin-bottom:16px"><span>🧼</span><span>매 대여 후 위생 관리, 출고 직전 다시 확인해요</span></div>
       <div class="policy-box">
         <div class="pb-row"><span>📅</span><span><b>최소 렌탈 기간:</b> 1개월</span></div>
         <div class="pb-row"><span>💰</span><span><b>보증금:</b> 반납 후 3~5 영업일 내 환불</span></div>
@@ -543,7 +549,13 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       </div>
       <div class="fi-hint" style="margin-top:-8px;margin-bottom:12px;color:var(--gray2)">📊 위 항목은 사전예약 수요 검증을 위한 최소 설문입니다.</div>
       <div class="fg"><label class="fl">요청사항 (선택)</label><textarea class="fi" id="r-note" rows="3" placeholder="예) 배송 전 연락 부탁드립니다"></textarea></div>
+      <div class="info-notice" style="margin-bottom:10px"><span>🧼</span><span>주문 제품은 출고 전 위생 재점검 후 발송됩니다.</span></div>
       <div class="info-notice" style="margin-bottom:16px"><span>⚠️</span><span>서울 일부 지역만 배송 가능합니다. 정확한 배송 가능 여부는 예약 후 확인 드립니다.</span></div>
+      <div class="policy-box" style="margin-bottom:16px">
+        <div class="pb-row"><span>Q</span><span><b>어디를 소독하나요?</b> 손잡이·시트·벨트 등 접촉부 우선 소독</span></div>
+        <div class="pb-row"><span>Q</span><span><b>언제 살균하나요?</b> 반납 후 + 출고 전 이중 확인</span></div>
+        <div class="pb-row"><span>Q</span><span><b>문제 있으면요?</b> 접수 시 신속 재처리 지원</span></div>
+      </div>
       <div class="sec-title" style="padding:0;margin-bottom:10px">요금 계산</div>
       <div class="price-tbl">
         <div class="pt-row"><span class="pt-label">월 렌탈료</span><span class="pt-value" id="rc-monthly">-</span></div>
@@ -1103,11 +1115,12 @@ function renderMiniThumb(p, size=56) {
 ═══════════════════════════════════════ */
 function renderHome() {
   const list = document.getElementById('prod-list'); if(!list) return;
+  const hygieneBadges = ['UV 살균', '접촉부 소독', '출고 전 점검'];
   list.innerHTML = PRODS.map(p => `
     <div class="pc" onclick="openDetail(${p.id})">
       <div class="pc-hero" style="background:${p.bgGrad}">
         ${renderCardHero(p)}
-        <div class="pc-badges">${p.tags.slice(0,2).map(t=>`<span class="badge" style="background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9)">${t}</span>`).join('')}</div>
+        <div class="pc-badges">${hygieneBadges.map(t=>`<span class="badge" style="background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9)">${t}</span>`).join('')}</div>
         <div class="pc-avail"><span class="badge" style="background:${p.available?'rgba(45,122,79,0.85)':'rgba(198,40,40,0.85)'};color:#fff">${p.available?'● 예약 가능':'● 품절'}</span></div>
       </div>
       <div class="pc-body">
