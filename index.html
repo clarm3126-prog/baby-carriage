@@ -599,6 +599,54 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   </div>
 </div>
 
+<!-- ════════ CLEANING SERVICE ════════ -->
+<div id="s-clean" class="screen">
+  <div class="hdr"><div class="hdr-r"></div><h2>유모차 세척 서비스</h2><div class="hdr-r"></div></div>
+  <div class="scroll-body" style="padding:20px 20px calc(var(--nav) + 20px)">
+    <div class="card" style="padding:18px 16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:var(--accent);letter-spacing:0.8px;margin-bottom:6px">PREMIUM CLEANING</div>
+      <div style="font-size:22px;font-weight:900;line-height:1.3;margin-bottom:6px">유모차 세척 1회</div>
+      <div style="font-size:13px;color:var(--gray1);margin-bottom:14px">세척 · 소독 · UV-C 살균 · 출고 검수 기준으로 꼼꼼하게 진행합니다.</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:28px;font-weight:900;color:var(--accent)">49,000원</span>
+        <span style="font-size:13px;color:var(--gray2)">/ 1회</span>
+      </div>
+    </div>
+
+    <div class="info-notice" style="margin-bottom:12px"><span>✅</span><span>손잡이·시트·벨트·프레임 접촉부 집중 세척</span></div>
+    <div class="info-notice" style="margin-bottom:16px"><span>🚚</span><span>전국 서비스 가능 (지역별 일정 상이)</span></div>
+
+    <div class="fg">
+      <label class="fl">수거 희망일</label>
+      <input class="fi" id="c-date" type="date">
+    </div>
+    <div class="fg">
+      <label class="fl">주소</label>
+      <input class="fi" id="c-addr1" type="text" placeholder="도로명 주소">
+    </div>
+    <div class="fg">
+      <label class="fl">상세 주소</label>
+      <input class="fi" id="c-addr2" type="text" placeholder="동/호수">
+    </div>
+    <div class="fg">
+      <label class="fl">유모차 구매 시기</label>
+      <select class="fi" id="c-purchase-period">
+        <option value="">선택</option>
+        <option>1개월 이내</option>
+        <option>3개월 이내</option>
+        <option>6개월 이내</option>
+        <option>1년 이내</option>
+        <option>1년 이상</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">요청사항 (선택)</label>
+      <textarea class="fi" id="c-note" rows="3" placeholder="예) 바퀴 오염이 심해요"></textarea>
+    </div>
+    <button class="btn btn-p" onclick="submitCleaningRequest()">세척 서비스 신청하기</button>
+  </div>
+</div>
+
 <!-- ════════ RES DETAIL ════════ -->
 <div id="s-res-detail" class="screen">
   <div class="hdr"><button class="btn-back" onclick="go('history')">←</button><h2>예약 상세</h2><div class="hdr-r"></div></div>
@@ -714,6 +762,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 <!-- ════════ BOTTOM NAV ════════ -->
 <nav id="bnav">
   <button class="ni on" id="ni-home" onclick="go('home');navOn('home')"><span class="ico">🏠</span><span class="lbl">홈</span></button>
+  <button class="ni" id="ni-clean" onclick="go('clean');navOn('clean')"><span class="ico">🧽</span><span class="lbl">유모차세척</span></button>
   <button class="ni" id="ni-history" onclick="go('history');navOn('history')"><span class="ico">📋</span><span class="lbl">예약내역</span></button>
   <button class="ni" id="ni-mypage" onclick="go('mypage');navOn('mypage')"><span class="ico">👤</span><span class="lbl">마이페이지</span></button>
 </nav>
@@ -861,6 +910,7 @@ function go(id) {
   const noNav = ['splash','login','signup','complete','policy-refund','policy-damage','policy-terms'];
   document.getElementById('bnav').style.display = noNav.includes(id) ? 'none' : 'flex';
   if(id==='home') renderHome();
+  if(id==='clean') renderClean();
   if(id==='history') renderHistory();
   if(id==='mypage') renderMypage();
   if(id==='detail' && selProd) renderDetail(selProd);
@@ -1394,10 +1444,11 @@ const STATUS_LABELS = ['예약접수','배송준비중','배송완료','이용�
 const STATUS_BADGE = {'예약접수':'b-yellow','배송준비중':'b-blue','배송완료':'b-blue','이용중':'b-green','반납요청':'b-orange','반납완료':'b-gray'};
 function renderHistory() {
   const all = getRentals().filter(r => r.userId===(me?.id||''));
+  const cleanings = ls.getArr('bb_cleanings').filter(c => c.userId === (me?.id||''));
   const container = document.getElementById('history-list'); if(!container) return;
-  if(!all.length) { container.innerHTML = `<div class="empty"><div class="empty-ico">📭</div><div class="empty-t">예약 내역이 없어요</div><div class="empty-s">유모차를 렌탈해보세요!</div></div>`; return; }
+  if(!all.length && !cleanings.length) { container.innerHTML = `<div class="empty"><div class="empty-ico">📭</div><div class="empty-t">예약 내역이 없어요</div><div class="empty-s">유모차를 렌탈해보세요!</div></div>`; return; }
   const sorted = [...all].sort((a,b) => b.id.localeCompare(a.id));
-  container.innerHTML = sorted.map(r => {
+  const rentalHtml = sorted.map(r => {
     const p = PRODS.find(x => x.id === r.prodId);
     const th = p ? renderMiniThumb(p,52) : `<div style="width:52px;height:52px;border-radius:10px;background:var(--gray4);flex-shrink:0"></div>`;
     let acts='';
@@ -1409,6 +1460,69 @@ function renderHistory() {
       <div class="rh-btm"><div class="rh-price">${r.total.toLocaleString()}원</div><div class="rh-actions">${acts}</div></div>
     </div>`;
   }).join('');
+  const cleanHtml = [...cleanings].sort((a,b)=>b.id.localeCompare(a.id)).map(c => `
+    <div class="rh-card">
+      <div class="rh-top">
+        <div style="width:52px;height:52px;border-radius:10px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px">🧽</div>
+        <div style="flex:1">
+          <div class="rh-name">유모차 세척 서비스</div>
+          <div class="rh-date">📅 수거 희망일: ${c.date}</div>
+          <div class="rh-addr">🗓️ 구매 시기: ${c.purchasePeriod || '-'}</div>
+          <div class="rh-addr">📍 ${(c.addr||'').substring(0,20)}${(c.addr||'').length>20?'...':''}</div>
+        </div>
+        <span class="badge b-blue">${c.status || '접수완료'}</span>
+      </div>
+      <div class="rh-btm"><div class="rh-price">${(c.price || 49000).toLocaleString()}원</div><div class="rh-actions"></div></div>
+    </div>
+  `).join('');
+  container.innerHTML = `${rentalHtml}${cleanHtml}`;
+}
+
+function renderClean() {
+  const dateEl = document.getElementById('c-date');
+  const addr1El = document.getElementById('c-addr1');
+  const addr2El = document.getElementById('c-addr2');
+  const purchaseEl = document.getElementById('c-purchase-period');
+  if(!dateEl || !addr1El || !addr2El || !purchaseEl) return;
+  const today = new Date().toISOString().split('T')[0];
+  dateEl.min = today;
+  if(!dateEl.value) dateEl.value = today;
+  if(!addr1El.value) addr1El.value = ls.get('bb_addr1') || '';
+  if(!addr2El.value) addr2El.value = ls.get('bb_addr2') || '';
+  if(!purchaseEl.value) purchaseEl.value = '';
+}
+
+function submitCleaningRequest() {
+  if(!me) return showToast('로그인이 필요해요');
+  const date = (document.getElementById('c-date')?.value || '').trim();
+  const addr1 = (document.getElementById('c-addr1')?.value || '').trim();
+  const addr2 = (document.getElementById('c-addr2')?.value || '').trim();
+  const purchasePeriod = (document.getElementById('c-purchase-period')?.value || '').trim();
+  const note = (document.getElementById('c-note')?.value || '').trim();
+  if(!date) return showToast('수거 희망일을 선택해주세요');
+  if(!addr1) return showToast('주소를 입력해주세요');
+  if(!purchasePeriod) return showToast('유모차 구매 시기를 선택해주세요');
+  const req = {
+    id: 'CL' + Date.now(),
+    userId: me.id,
+    name: me.name,
+    phone: me.phone || '',
+    date,
+    purchasePeriod,
+    addr: addr1 + (addr2 ? ` ${addr2}` : ''),
+    note,
+    price: 49000,
+    status: '접수완료',
+    requestedAt: new Date().toLocaleString('ko-KR')
+  };
+  const all = ls.getArr('bb_cleanings');
+  all.push(req);
+  ls.set('bb_cleanings', all);
+  ls.set('bb_addr1', addr1);
+  ls.set('bb_addr2', addr2);
+  if(document.getElementById('c-purchase-period')) document.getElementById('c-purchase-period').value = '';
+  if(document.getElementById('c-note')) document.getElementById('c-note').value = '';
+  showToast('세척 서비스 예약이 완료됐어요. 운영팀에서 확인 후 연락드릴게요.');
 }
 function cancelRental(id) {
   if(!confirm('정말 취소하시겠어요?')) return;
