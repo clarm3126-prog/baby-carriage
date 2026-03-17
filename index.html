@@ -278,7 +278,10 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .splash-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px;position:relative;z-index:1;}
 .splash-logo{font-family:'Playfair Display',serif;font-size:56px;color:#fff;line-height:1;margin-bottom:8px;}
 .splash-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin:0 auto 24px;}
-.splash-sub{font-size:15px;color:rgba(255,255,255,0.65);margin-bottom:60px;line-height:1.6;}
+.splash-sub{font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:20px;line-height:1.6;}
+.splash-summary{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:14px 16px;text-align:left;margin-bottom:24px;}
+.splash-row{font-size:13px;color:rgba(255,255,255,0.9);line-height:1.55;display:flex;gap:8px;align-items:flex-start;}
+.splash-row + .splash-row{margin-top:8px;}
 .splash-btn{background:var(--accent);color:#fff;border:none;padding:18px 48px;border-radius:var(--r-sm);font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(232,98,58,0.4);}
 .splash-pattern{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
 .splash-pattern::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;border:60px solid rgba(255,255,255,0.04);top:-100px;right:-100px;}
@@ -304,8 +307,14 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   <div class="splash-inner">
     <div class="splash-logo">베베카</div>
     <div class="splash-dot"></div>
-    <div class="splash-sub">프리미엄 유모차를<br>월 단위로 간편하게</div>
-    <button class="splash-btn" onclick="go('login')">시작하기</button>
+    <div class="splash-sub">프리미엄 유모차를<br>큰돈 쓰기 전 1개월 체험하는 렌탈 서비스</div>
+    <div class="splash-summary">
+      <div class="splash-row"><span>•</span><span>프리미엄 유모차 월 렌탈 + 구매 전 체험</span></div>
+      <div class="splash-row"><span>•</span><span>세척 · 소독 · UV-C 살균 · 출고 전 재검수</span></div>
+      <div class="splash-row"><span>•</span><span>전국 배송 가능, 휴대전화 입력만으로 간편 예약</span></div>
+      <div class="splash-row"><span>•</span><span>유모차 세척 단독 서비스 (1회 49,000원)</span></div>
+    </div>
+    <button class="splash-btn" onclick="go('home');navOn('home')">베베카 둘러보기</button>
   </div>
 </div>
 
@@ -1670,10 +1679,10 @@ function closeModal(e,id) { if(e.target===document.getElementById(id)) document.
 ═══════════════════════════════════════ */
 (async function init() {
   initKakao();
-  // 로그인 단계 없이 홈에서 바로 시작
+  // URL 첫 진입 시 서비스 소개 화면 노출
   const saved = ls.get('bb_me');
   if(saved && saved.id) me = saved;
-  go('home'); navOn('home');
+  go('splash');
 })();
 </script>
 </body>
