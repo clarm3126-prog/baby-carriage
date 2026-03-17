@@ -535,20 +535,6 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
             <option>25개월 이상</option>
           </select>
         </div>
-        <div class="fg">
-          <label class="fl">주 이용 지역 <span style="color:var(--accent);font-weight:700;text-transform:none">*</span></label>
-          <select class="fi" id="r-use-area" onchange="toggleUseAreaEtc()">
-            <option value="">선택</option>
-            <option>강남/서초/송파</option>
-            <option>마포/용산/중구</option>
-            <option>강서/양천/영등포</option>
-            <option>노원/도봉/강북</option>
-            <option>경기 남부</option>
-            <option>경기 북부</option>
-            <option>기타</option>
-          </select>
-          <input class="fi" id="r-use-area-etc" type="text" placeholder="기타 지역 직접 입력" style="margin-top:8px;display:none;">
-        </div>
       </div>
       <div class="fg">
         <label class="fl">유입 경로 (선택)</label>
@@ -1316,9 +1302,6 @@ function gotoReserve() {
   document.getElementById('r-addr1').value = ls.get('bb_addr1')||'';
   document.getElementById('r-addr2').value = ls.get('bb_addr2')||'';
   document.getElementById('r-baby-age').value = '';
-  document.getElementById('r-use-area').value = '';
-  document.getElementById('r-use-area-etc').value = '';
-  document.getElementById('r-use-area-etc').style.display = 'none';
   document.getElementById('r-ref-source').value = '';
   document.getElementById('r-ref-source-etc').value = '';
   document.getElementById('r-ref-source-etc').style.display = 'none';
@@ -1395,14 +1378,6 @@ function fillRecentAddress() {
   document.getElementById('r-addr2').value = a2;
   showToast('최근 주소를 불러왔어요');
 }
-function toggleUseAreaEtc() {
-  const useAreaEl = document.getElementById('r-use-area');
-  const etcEl = document.getElementById('r-use-area-etc');
-  if(!useAreaEl || !etcEl) return;
-  const showEtc = useAreaEl.value === '기타';
-  etcEl.style.display = showEtc ? 'block' : 'none';
-  if(!showEtc) etcEl.value = '';
-}
 function toggleRefSourceEtc() {
   const sourceEl = document.getElementById('r-ref-source');
   const etcEl = document.getElementById('r-ref-source-etc');
@@ -1430,9 +1405,6 @@ async function gotoPayment() {
   const phone=(document.getElementById('r-phone').value || '').replace(/\D/g,'');
   const addr1=document.getElementById('r-addr1').value.trim();
   const babyAge=document.getElementById('r-baby-age').value;
-  const useAreaBase=document.getElementById('r-use-area').value;
-  const useAreaEtc=(document.getElementById('r-use-area-etc').value || '').trim();
-  const useArea = useAreaBase === '기타' ? useAreaEtc : useAreaBase;
   const refSourceBase=document.getElementById('r-ref-source').value;
   const refSourceEtc=(document.getElementById('r-ref-source-etc').value || '').trim();
   const refCode = refSourceBase === '기타' ? refSourceEtc : refSourceBase;
@@ -1441,8 +1413,6 @@ async function gotoPayment() {
   if(start < RESERVATION_OPEN_DATE) return showToast(`렌탈 시작일은 ${RESERVATION_OPEN_DATE}부터 선택할 수 있어요`);
   if(!addr1) return showToast('배송 주소를 입력해주세요');
   if(!babyAge) return showToast('아이 연령대를 선택해주세요');
-  if(!useAreaBase) return showToast('주 이용 지역을 선택해주세요');
-  if(useAreaBase === '기타' && !useAreaEtc) return showToast('기타 지역을 입력해주세요');
   if(refSourceBase === '기타' && !refSourceEtc) return showToast('기타 유입 경로를 입력해주세요');
   let end=document.getElementById('r-end').value;
   if(!end){const d=new Date(start);d.setMonth(d.getMonth()+resData.months);end=d.toISOString().split('T')[0];}
@@ -1453,7 +1423,7 @@ async function gotoPayment() {
   ls.set('bb_guest_phone', phone);
   ls.set('bb_addr1', addr1);
   ls.set('bb_addr2', addr2);
-  resData.babyAge=babyAge; resData.useArea=useArea; resData.refCode=refCode;
+  resData.babyAge=babyAge; resData.useArea='미입력'; resData.refCode=refCode;
   resData.note=document.getElementById('r-note').value;
 
   const orderId = 'PR' + Date.now().toString();
@@ -1505,7 +1475,6 @@ function saveAndComplete(orderId) {
     <div class="rc-row"><span class="rc-l">상품명</span><span>${rental.prodName}</span></div>
     <div class="rc-row"><span class="rc-l">렌탈 기간</span><span>${rental.start} ~ ${rental.end}</span></div>
     <div class="rc-row"><span class="rc-l">아이 연령대</span><span>${rental.babyAge || '-'}</span></div>
-    <div class="rc-row"><span class="rc-l">주 이용 지역</span><span>${rental.useArea || '-'}</span></div>
     <div class="rc-row"><span class="rc-l">연락처</span><span>${rental.userId || '-'}</span></div>
     ${rental.refCode ? `<div class="rc-row"><span class="rc-l">유입 경로</span><span>${rental.refCode}</span></div>` : ''}
     <div class="rc-row"><span class="rc-l">배송 주소</span><span style="font-size:12px;text-align:right;max-width:150px">${rental.addr}</span></div>
